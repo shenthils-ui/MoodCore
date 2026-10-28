@@ -30,7 +30,7 @@ fonts = ''.join(
     f"src:url(data:font/woff2;base64,{base64.b64encode((R / 'fonts' / f).read_bytes()).decode()}) format('woff2')}}\n"
     for n, f, w, s in FACES)
 css = (R / 'src/styles.css').read_text()
-js = (R / 'src/stickers.js').read_text() + '\n' + (R / 'src/app.js').read_text()
+js = (R / 'src/logic.js').read_text() + '\n' + (R / 'src/stickers.js').read_text() + '\n' + (R / 'src/app.js').read_text()
 
 # Service worker registration. Skipped inside the Android wrapper, which serves files itself.
 SW = """<script>
@@ -41,7 +41,7 @@ if ('serviceWorker' in navigator && !window.AndroidBridge && location.protocol !
 
 html = f'''<!doctype html>
 <html lang="en" data-mood="beige"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f9f3ea">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">

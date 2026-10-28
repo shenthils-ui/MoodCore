@@ -33,7 +33,7 @@ html[data-mood="sky"] {
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-ui); font-size: 15px;
-  overflow: hidden; overscroll-behavior: none; -webkit-user-select: none; user-select: none;
+  overflow: hidden; overscroll-behavior: none; -webkit-user-select: none; user-select: none; touch-action: manipulation;
   background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 5px 5px;
 }
 input, textarea, select, button { font: inherit; color: inherit; }
@@ -60,9 +60,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px
   border-top: 1px solid var(--line); padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 6px) max(8px, env(safe-area-inset-left, 0px));
   box-shadow: 0 -6px 20px var(--line);
 }
-.nav button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; color: var(--ink-soft); font-size: 12px; font-weight: 700; border-radius: 14px; }
+.nav button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; color: color-mix(in srgb, var(--ink-soft), var(--ink) 45%); font-size: 12px; font-weight: 700; border-radius: 14px; }
 .nav button svg { width: 24px; height: 24px; }
-.nav button[aria-selected="true"] { color: var(--deep); background: var(--surface2); }
+.nav button[aria-selected="true"] { color: var(--ink); background: var(--surface2); }
 
 .hint { font-family: var(--f-hand); font-size: 22px; color: var(--ink-soft); text-align: center; margin: 14px 0 0; }
 .small { font-size: 13px; color: var(--ink-soft); }

@@ -3,7 +3,7 @@
 A cute journaling app for an Android phone:
 
 - **Journal**: a book with pages. Double tap the cover to open it, tap a page to draw, write, and add shapes and stickers.
-- **Sticker book**: read only. You earn 1 sticker on each day you finish all your to-dos.
+- **Sticker book**: read only. You earn 1 sticker on each day you finish all your to-dos. A day with no to-dos gives none, routines do not count, and a sticker you already earned stays if you untick a to-do later.
 - **To-do and routines**: checkbox or counter to-dos with your own emoji, and routines on chosen days and times.
 - **Calendar**: a mood emoji, a short note and a day type (birthday, party, appointment, your own label) for each day.
 - 4 colour themes and 378 original stickers.
@@ -31,17 +31,20 @@ No cloud, no accounts, no tracking. Everything is stored on the phone.
 
 1. Edit the files in `src/`.
 2. Run `python3 build.py`.
-3. Commit and push to `main`. GitHub deploys it automatically.
-4. On the phone, open the app once with internet, then close and reopen it. The new version loads. Your data is kept.
+3. Run the tests: `node --test "tests/*.test.mjs"`. Optional phone-size browser check: `npm i --no-save playwright && node tests/e2e.mjs`.
+4. Commit and push to `main`. GitHub runs the tests, then deploys. If a test fails, nothing is deployed.
+5. On the phone, open the app once with internet, then close and reopen it. The new version loads. Your data is kept.
 
 ## Project layout
 
 | Path | What it is |
 |---|---|
+| `src/logic.js` | Rules without screens: routine repeats, daily sticker rule, backup format |
 | `src/app.js` | App logic and screens |
 | `src/stickers.js` | The sticker library, drawn in code |
 | `src/styles.css` | Look and the 4 themes |
 | `fonts/` | Fonts, built into the page so it works offline (SIL Open Font License) |
+| `tests/` | `logic.test.mjs` (Node unit tests), `e2e.mjs` (browser check at 390x844) |
 | `build.py` | Builds `web/index.html`, `web/sw.js` and the Android copy |
 | `tools/sw.template.js` | Source of the offline service worker |
 | `web/` | What GitHub Pages serves |

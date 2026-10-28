@@ -6,12 +6,8 @@
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  const pad = n => String(n).padStart(2, '0');
-  const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+  const { pad, ymd, parse, addDays, wdIdx, weekOfMonth, routineOn, rewardDue, buildBackup, parseBackup } = CMLogic;
   const today = () => ymd(new Date());
-  const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
-  const wdIdx = s => (parse(s).getDay() + 6) % 7; // Monday = 0
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -785,29 +781,13 @@
 
   /* ================= TASKS + ROUTINES ================= */
   const T = { date: today() };
-  const activeTasks = d => S.tasks.filter(t => t.created <= d && (!t.deleted || d < t.deleted));
+  const activeTasks = d => CMLogic.activeTasks(S.tasks, d);
   const dayLog = d => (S.log[d] = S.log[d] || { t: {}, r: {} });
-  function taskDone(t, d) {
-    const v = (S.log[d] && S.log[d].t[t.id]);
-    return t.type === 'check' ? !!v : (+v || 0) >= t.goal;
-  }
-  function allDone(d) { const ts = activeTasks(d); return ts.length > 0 && ts.every(t => taskDone(t, d)); }
-  function weekOfMonth(s) { return Math.ceil(parse(s).getDate() / 7); }
-  function isLastWeek(s) { const d = parse(s); const n = new Date(d); n.setDate(d.getDate() + 7); return n.getMonth() !== d.getMonth(); }
-  function routineOn(r, d) {
-    if (d < r.start || (r.deleted && d >= r.deleted)) return false;
-    const wd = wdIdx(d);
-    switch (r.repeat) {
-      case 'daily': return true;
-      case 'weekly': return r.days.includes(wd);
-      case 'monthly': return r.days.includes(wd) && (r.nth === 5 ? isLastWeek(d) : weekOfMonth(d) === r.nth);
-      case 'yearly': { const a = parse(r.start), b = parse(d); return a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
-    }
-    return false;
-  }
+  const taskDone = (t, d) => CMLogic.taskDone(t, S.log, d);
+  const allDone = d => CMLogic.allDone(S.tasks, S.log, d);
   const earnedOn = d => S.earned.find(e => e.date === d);
   function checkReward(d) {
-    if (d > today() || earnedOn(d) || !allDone(d)) return;
+    if (!rewardDue(d, today(), S.earned, S.tasks, S.log)) return;
     const order = Stickers.rewardOrder();
     const sid = order[S.earned.length % order.length];
     S.earned.push({ date: d, sticker: sid }); save('earned');
@@ -1162,11 +1142,11 @@
     ['beige', 'Brown & beige', ['#efe5d6', '#d8b48f', '#8a5f40', '#f9f3ea']]
   ];
   async function exportData() {
-    const out = { app: 'custom-mood', version: 1, exported: new Date().toISOString(), data: {} };
-    for (const k of await DB.keys()) out.data[k] = await DB.get(k);
-    for (const k of ['settings', 'journal', 'tasks', 'routines', 'log', 'earned', 'cal']) out.data[k] = S[k];
-    for (const id in PAGES) out.data['page:' + id] = PAGES[id];
-    return JSON.stringify(out);
+    const data = {};
+    for (const k of await DB.keys()) data[k] = await DB.get(k);
+    for (const k of ['settings', 'journal', 'tasks', 'routines', 'log', 'earned', 'cal']) data[k] = S[k];
+    for (const id in PAGES) data['page:' + id] = PAGES[id];
+    return buildBackup(data);
   }
   function openSettings() {
     openSheet({
@@ -1194,8 +1174,8 @@
         });
         $('#bkFile', sh).addEventListener('change', async e => {
           const f = e.target.files[0]; if (!f) return;
-          let obj; try { obj = JSON.parse(await f.text()); } catch (err) { $('#bkMsg', sh).textContent = 'That file is not a Custom Mood backup.'; return; }
-          if (!obj || obj.app !== 'custom-mood' || !obj.data) { $('#bkMsg', sh).textContent = 'That file is not a Custom Mood backup.'; return; }
+          const obj = parseBackup(await f.text());
+          if (!obj) { $('#bkMsg', sh).textContent = 'That file is not a Custom Mood backup.'; return; }
           $('#bkMsg', sh).innerHTML = `<div class="confirm-box"><b>Replace everything in the app with this backup from ${esc((obj.exported || '').slice(0, 10))}?</b><div class="row"><button class="btn soft" data-rc="no">Cancel</button><button class="btn" data-rc="yes">Restore</button></div></div>`;
           $('#bkMsg', sh).onclick = async ev => {
             const r = ev.target.closest('[data-rc]'); if (!r) return;
