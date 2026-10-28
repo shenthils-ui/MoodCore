@@ -1,0 +1,17 @@
+{
+  "name": "♡𝓒𝓾𝓼𝓽𝓸𝓶 𝓜𝓸𝓸𝓭 ♡",
+  "short_name": "Custom Mood",
+  "description": "A cute journal with a sticker book, to-dos, routines and a mood calendar. Everything stays on your phone.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f9f3ea",
+  "theme_color": "#f9f3ea",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
